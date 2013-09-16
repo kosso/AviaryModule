@@ -47,6 +47,62 @@
 	[super didReceiveMemoryWarning:notification];
 }
 
+#pragma mark Listener Notifications
+
+-(void)_listenerAdded:(NSString *)type count:(int)count
+{
+    if (count == 1 && [type isEqualToString:@"avEditorFinished"])
+    {
+        // the first (of potentially many) listener is being added 
+        // for event named 'my_event'
+
+        NSLog(@"[INFO] AVIARY MODULE listener added : avEditorFinished");
+
+    } else if (count == 1 && [type isEqualToString:@"avEditorCancel"])
+    {
+        // the first (of potentially many) listener is being added 
+        // for event named 'my_event'
+
+        NSLog(@"[INFO] AVIARY MODULE listener added : avEditorCancel");
+
+    } else if (count == 1 && [type isEqualToString:@"avResolutionFinished"])
+    {
+        // the first (of potentially many) listener is being added 
+        // for event named 'my_event'
+
+        NSLog(@"[INFO] AVIARY MODULE listener added : avResolutionFinished");
+
+    }
+}
+
+-(void)_listenerRemoved:(NSString *)type count:(int)count
+{
+    if (count == 0 && [type isEqualToString:@"avEditorFinished"])
+    {
+        // the last listener called for event named 'my_event' has
+        // been removed, we can optionally clean up any resources
+        // since no body is listening at this point for that event
+
+        NSLog(@"[INFO] AVIARY MODULE listener removed : avEditorFinished");
+
+
+    } else if (count == 0 && [type isEqualToString:@"avEditorCancel"])
+    {
+        // the first (of potentially many) listener is being added 
+        // for event named 'my_event'
+
+        NSLog(@"[INFO] AVIARY MODULE listener added : avEditorCancel");
+
+    } else if (count == 0 && [type isEqualToString:@"avResolutionFinished"])
+    {
+        // the first (of potentially many) listener is being added 
+        // for event named 'my_event'
+
+        NSLog(@"[INFO] AVIARY MODULE listener added : avResolutionFinished");
+
+    }
+}
+
 #pragma mark Private APIs
 -(void)modalEditorController:(id)param
 {
@@ -137,7 +193,7 @@
     UIImage *source = [self convertToUIImage:[params objectAtIndex:0]];
     if ([params count] == 1){
         [self newEditorController:source];
-    }else if ([params count] == 2){
+    } else if ([params count] == 2){
         NSArray *tools = [NSArray arrayWithArray:(NSArray *)[params objectAtIndex:1]];
         [self newEditorController:source withTools:tools];
     }
@@ -150,17 +206,37 @@
 -(void)newImageResolutionEditor:(id)params
 {
     UIImage *source = [self convertToUIImage:[params objectAtIndex:0]];
-    [self newEditorController:source];
+
+    if ([params count] == 3){
+        NSArray *tools = [NSArray arrayWithArray:(NSArray *)[params objectAtIndex:2]];
+        [self newEditorController:source withTools:tools];
+    } else {
+        [self newEditorController:source];
+    }
+    
     __block AFPhotoEditorSession *session = [editorController session];
       
     AFPhotoEditorContext *context;    
+    
     if ([params count] == 1){
-        context = [session createContext];
-    }else if ([params count] == 2){
-        context = [session createContextWithSize:[self convertToCGSize:(NSDictionary *)[params objectAtIndex:1]]];
+        // deprecated
+        // context = [session createContext];
+        context = [session createContextWithImage:source];
+
+
+    } else if ([params count] == 2){
+        // deprecated
+        // context = [session createContextWithSize:[self convertToCGSize:(NSDictionary *)[params objectAtIndex:1]]];
+        context = [session createContextWithImage:source maxSize:[self convertToCGSize:(NSDictionary *)[params objectAtIndex:1]]];
+
     }
     
-    [context renderInputImage:source completion:^(UIImage *result) {
+    // deprecated
+    //[context renderInputImage:source completion:^(UIImage *result) {
+    [context render:^(UIImage *result) {
+
+         NSLog(@"[INFO] AVIARY MODULE render has completed");
+
         // `result` will be nil if the session is canceled, or non-nil if the session was closed successfully and rendering completed   
         [self fireEvent:@"avResolutionFinished" withObject:[self convertResultDic:result]];
         [editorController dismissViewControllerAnimated:NO completion:nil];
@@ -238,6 +314,8 @@
 // Post edited image by notification.
 -(void)photoEditor:(AFPhotoEditorController *)editor finishedWithImage:(UIImage *)image
 {
+    NSLog(@"[INFO] AVIARY MODULE fire avEditorFinished");
+
     [self fireEvent:@"avEditorFinished" withObject:[self convertResultDic:image]];
     
     if([view_parentViewController(editor) respondsToSelector:@selector(dismissViewControllerAnimated:completion:)])
@@ -245,7 +323,7 @@
     else if([view_parentViewController(editor) respondsToSelector:@selector(dismissModalViewControllerAnimated:)])
         [view_parentViewController(editor) dismissModalViewControllerAnimated:YES];
     else
-        NSLog(@"Oooops, what system is this ?!!! - should never see this !");
+        NSLog(@"[INFO] AVIARY MODULE Oooops, what system is this ?!!! - should never see this !");
      
     [editor release];
 }
@@ -254,6 +332,8 @@
 -(void)photoEditorCanceled:(AFPhotoEditorController *)editor
 {
     
+     NSLog(@"[INFO] AVIARY MODULE fire avEditorCancel");
+
     [self fireEvent:@"avEditorCancel" withObject:nil];
     
     if([view_parentViewController(editor) respondsToSelector:@selector(dismissViewControllerAnimated:completion:)])
@@ -261,7 +341,7 @@
     else if([view_parentViewController(editor) respondsToSelector:@selector(dismissModalViewControllerAnimated:)])
         [view_parentViewController(editor) dismissModalViewControllerAnimated:YES];
     else
-        NSLog(@"Oooops, what system is this ?!!! - should never see this !");
+        NSLog(@"[INFO] AVIARY MODULE Oooops, what system is this ?!!! - should never see this !");
     
     [editor release];
 }
