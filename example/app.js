@@ -1,18 +1,44 @@
+/*
+
+IMPORTANT STUFF!
+
+NB: Don't forget to add the AviarySDKResources.bundle file to your Resources folder.
+
+ALSO: Don't forget to add your Avairy API Key to your tiapp.xml in the <ios> section: 
+
+eg: 
+    <ios>
+        <min-ios-ver>5.0</min-ios-ver>
+        <plist>
+            <dict>
+                <key>Aviary-API-Key</key>
+                <string>12345YourAPIkey123456</string>
+            </dict>
+        </plist>
+    </ios>
+
+*/
+
 
 
 var win = Ti.UI.createWindow({
 	backgroundColor:'white'
 });
-var mainWindow = Ti.UI.createView({ height: 320, top:0, width: Ti.UI.FILL });
+var mainView = Ti.UI.createView({ backgroundColor:'#eee', height: 320, top:20, width: 320 });
 var iv = Titanium.UI.createImageView({ top:0, width: 320});
 
 var aviary = require('com.ghkim.aviary_ios');
 var tools = ['kAFEffects', 'kAFOrientation', 'kAFBrightness', 'kAFContrast', 'kAFSharpness'];
 
-function setFilter() {
-	Ti.API.log('setFilter() called');
-	var img = mainWindow.toImage();
-    	aviary.newImageEditor(img, tools);
+var media_file = null;
+
+var startbutton = Ti.UI.createButton({  title: 'Select Photo...', bottom: 10, left: 10 });
+var filterbutton = Ti.UI.createButton({  title: 'Filter...', bottom: 10, right: 10 });
+
+
+function openAviaryFilters() {
+
+        aviary.newImageEditor(media_file, tools);
         aviary.displayEditor();
 	
 }
@@ -26,6 +52,8 @@ function selectPhoto() {
 
         var cropRect = event.cropRect;
         image = event.media;//blob object
+
+        media_file = image;
 
         // set image view
         if(event.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
@@ -54,9 +82,10 @@ function selectPhoto() {
             
             //iv.backgroundImage = img;
             iv.image = img;
-            //mainWindow.backgroundImage = img;
-            //win.backgroundImage = img;
-            mainWindow.add(iv);
+            mainView.add(iv);
+
+           filterbutton.enabled = true;
+
             
         }
         else
@@ -64,7 +93,7 @@ function selectPhoto() {
 
         }
     },
-    allowEditing:true,
+    allowEditing:true, // will return a square image
     mediaTypes:[Ti.Media.MEDIA_TYPE_PHOTO]
     });
 
@@ -72,22 +101,25 @@ function selectPhoto() {
 
 aviary.addEventListener('avEditorFinished', function(ev){
         iv.image = ev.image;
+        // media_file is the final image blob.
+        media_file = ev.image;
     });
 
-var startbutton = Ti.UI.createButton({ title: 'Select Photo...', bottom: 10, left: 10 });
-var filterbutton = Ti.UI.createButton({ title: 'Filter...', bottom: 10, right: 10 });
 
-win.add(mainWindow);
+win.add(mainView);
 
 win.add(startbutton);
 win.add(filterbutton);
+
+filterbutton.enabled = false;
+
 
 startbutton.addEventListener('click',function(e) {
    selectPhoto();
 });
 
 filterbutton.addEventListener('click',function() {
-	setFilter();	
+	openAviaryFilters();	
 });
 
 win.open();
