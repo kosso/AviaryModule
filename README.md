@@ -17,7 +17,7 @@ Test commit
 
 ```
 <modules>
-   <module platform="iphone" version="1.0">com.ghkim.aviary_ios</module>
+   <module platform="iphone" version="1.2">com.ghkim.aviary_ios</module>
 </modules>
 <ios>
      <min-ios-ver>5.0</min-ios-ver>
@@ -31,14 +31,15 @@ Test commit
 ```
 
 * Make sure you add in the *AviarySDKResources.bundle* (located in the module folder), to your project files or it won't work! 
-  * Add it in **/platform/iphone/** and it will compile in during the build. Clean the project just in case.
+  * Simply add it to your main 'Resources' folder.
 
 Author
 ========
 
-&hearts; Big thanks to KimGeunHyeong for this module! 
+Big thanks to KimGeunHyeong for this module! 
 (dev.lasneo@gmail.com) : [tumblr](http://www.lasneo.tumblr.com/)
 
+Updated for Titanium 3.2.x and iOS7 by @Kosso. 
 
  License
 ========
