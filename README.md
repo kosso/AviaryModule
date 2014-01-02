@@ -1,5 +1,7 @@
 #Aviary iphone module for Titanium Mobile
 
+If you have any trouble building, there's a working build in the zip file in the dist folder. Also check the example app.js, paying attention to the notes/comments at the top of the file.
+
 ##Requirements
 
 - Titanium Mobile SDK 3.0.xGA.
