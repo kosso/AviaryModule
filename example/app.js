@@ -14,61 +14,59 @@ function setFilter() {
 	var img = mainWindow.toImage();
     	aviary.newImageEditor(img, tools);
         aviary.displayEditor();
-	Ti.API.log('well well wlel');
+	
 }
 
 function selectPhoto() {
 
-Titanium.Media.openPhotoGallery({
+    Titanium.Media.openPhotoGallery({
 
-success:function(event)
-{
-
-    var cropRect = event.cropRect;
-    image = event.media;//blob object
-
-    // set image view
-    if(event.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
+    success:function(event)
     {
-        
-        if(cropRect) {
+
+        var cropRect = event.cropRect;
+        image = event.media;//blob object
+
+        // set image view
+        if(event.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
+        {
             
-            imgStr=Ti.Utils.base64encode(image);// doesn't work because 'image' has to be a string!, but how?
-            img_src = Titanium.Filesystem.getFile(Titanium.Filesystem.applicationDataDirectory,'image.jpg');
-            var img_src_height = Math.round(cropRect.height / (cropRect.width / 320));
-            
-            if(Ti.Platform.osname == 'android') {
+            if(cropRect) {
                 
-                img = image;
+                imgStr=Ti.Utils.base64encode(image);// doesn't work because 'image' has to be a string!, but how?
+                img_src = Titanium.Filesystem.getFile(Titanium.Filesystem.applicationDataDirectory,'image.jpg');
+                var img_src_height = Math.round(cropRect.height / (cropRect.width / 320));
+                
+                if(Ti.Platform.osname == 'android') {
+                    
+                    img = image;
+                    
+                } else {
+                    img_src.write(image.imageAsResized(320, img_src_height));
+                    var image = Titanium.UI.createImageView({image:img_src.nativePath, width: 320 });
+                    img = image.toImage();
+                }
+    	    
                 
             } else {
-                img_src.write(image.imageAsResized(320, img_src_height));
-                var image = Titanium.UI.createImageView({image:img_src.nativePath, width: 320 });
-                img = image.toImage();
+                img = image;
             }
-	    
             
-        } else {
-            img = image;
+            //iv.backgroundImage = img;
+            iv.image = img;
+            //mainWindow.backgroundImage = img;
+            //win.backgroundImage = img;
+            mainWindow.add(iv);
+            
         }
-        
-        //iv.backgroundImage = img;
-        iv.image = img;
-        //mainWindow.backgroundImage = img;
-        //win.backgroundImage = img;
-        mainWindow.add(iv);
-        
-    }
-    else
-    {
+        else
+        {
 
-    }
-},
-allowEditing:true,
-//popoverView:popoverView,
-//arrowDirection:arrowDirection,
-mediaTypes:[Ti.Media.MEDIA_TYPE_PHOTO]
-});
+        }
+    },
+    allowEditing:true,
+    mediaTypes:[Ti.Media.MEDIA_TYPE_PHOTO]
+    });
 
 }
 
